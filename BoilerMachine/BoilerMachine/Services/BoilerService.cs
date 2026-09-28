@@ -1,42 +1,46 @@
 ﻿using BoilerMachine.Delegates;
 using BoilerMachine.Enums;
 using BoilerMachine.Models;
+using System.Runtime.CompilerServices;
 
 namespace BoilerMachine.Services
 {
     public class BoilerService
     {
         private readonly Boiler _boiler;
-        private CancellationTokenSource _cts;
         private bool IsRunning = false;
+        private CancellationTokenSource _cts;
         public event InterruptStart? OnStartInterrupted;
         public event ResetRequest? OnResetRequest;
         public event StartCompletion? OnStartCompletion;
-        public BoilerService(Boiler boiler)
+        public event Action? OnAlreadyRunning;
+        public BoilerService(Boiler boiler, CancellationTokenSource cts)
         {
             this._boiler = boiler;
+            this._cts = cts;
         }
 
         public async Task StartSequence()
         {
+            if (this.IsRunning)
+            {
+                OnAlreadyRunning?.Invoke();
+                return;
+            }
             this.IsRunning = true;
-            this._cts = new CancellationTokenSource();
             try
             {
-                await RunSequence(this._cts);
+                await RunSequence(_cts);
             }
-            catch (OperationCanceledException)
+            catch (Exception)
             {
-                this._cts.Dispose();
-                OnStartInterrupted?.Invoke();
-            }
-            finally
-            {
+                _cts.TryReset();
                 this.IsRunning = false;
+                OnStartInterrupted?.Invoke();
             }
         }
 
-        public async Task RunSequence(CancellationTokenSource tokenSource)
+        public async Task RunSequence(CancellationTokenSource cts)
         {
             SystemStatus status = this.GetSystemStatus();
             if (status != SystemStatus.Ready)
@@ -44,13 +48,22 @@ namespace BoilerMachine.Services
                 OnResetRequest?.Invoke();
                 return;
             }
-
-            await Task.Delay(10 * 1000);
-            this.UpdateSystemStatus(SystemStatus.PrePurge);
-            await Task.Delay(10 * 1000);
-            this.UpdateSystemStatus(SystemStatus.Ignition);
-            this.UpdateSystemStatus(SystemStatus.Operable);
-            OnStartCompletion?.Invoke();
+            try
+            {
+                await Task.Delay(10 * 1000);
+                this.UpdateSystemStatus(SystemStatus.PrePurge);
+                await Task.Delay(10 * 1000);
+                this.UpdateSystemStatus(SystemStatus.Ignition);
+                this.UpdateSystemStatus(SystemStatus.Operable);
+                OnStartCompletion?.Invoke();
+            }
+            catch
+            {
+                cts.TryReset();
+                this.IsRunning = false;
+                OnStartInterrupted?.Invoke();
+            }
+            
         }
 
         public bool StopSequence()
@@ -62,7 +75,9 @@ namespace BoilerMachine.Services
             else
             {
                 this.UpdateSystemStatus(SystemStatus.Ready);
-                this._cts.Cancel();
+                _cts.Cancel();
+                this.IsRunning = false;
+                OnStartInterrupted?.Invoke();
                 return true;
             }
         }
@@ -89,6 +104,19 @@ namespace BoilerMachine.Services
             else
             {
                 return new OperationResult(false, "The system status is not ready (or) lockout state in order to toggle");
+            }
+        }
+
+        public bool SimulateError()
+        {
+            if (this._boiler.Status == SystemStatus.Operable)
+            {
+                this._boiler.Status = SystemStatus.Lockout;
+                return true;
+            }
+            else
+            {
+                return false;
             }
         }
 

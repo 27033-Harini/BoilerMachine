@@ -42,6 +42,10 @@ namespace BoilerMachine.Views
                         this.DisplayStopRequest();
                         Console.ReadKey();
                         break;
+                    case "3":
+                        this.SimulateError();
+                        Console.ReadKey();
+                        break;
                     case "4":
                         this.DisplayToggleRequest();
                         Console.ReadKey();
@@ -122,6 +126,20 @@ namespace BoilerMachine.Views
         public void DisplayStartCompletion()
         {
             Console.WriteLine("Start operation is completed successfully.");
+        }
+
+        public void DisplayRunningMessage()
+        {
+            Console.WriteLine("The start sequene is already running.");
+        }
+
+        public void SimulateError()
+        {
+            bool result = this._boilerService.SimulateError();
+            if (result)
+            {
+                Console.WriteLine("Error: System is in lockout.");
+            }
         }
     }
 }
