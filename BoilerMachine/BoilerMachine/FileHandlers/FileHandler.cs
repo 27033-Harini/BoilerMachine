@@ -2,20 +2,31 @@
 
 namespace BoilerMachine.FileHandlers
 {
-    public class FileHandler
+    /// <summary>
+    /// Class to handle file operations
+    /// </summary>
+    public class FileHandler : IFileHandler
     {
         private readonly string _filePath;
         private object _lockObject = new object();
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FileHandler"/> class
+        /// </summary>
+        /// <param name="filePath">Path of te file</param>
         public FileHandler(string filePath)
         {
             this._filePath = filePath;
         }
+
+        /// <inheritdoc/>
         public string ConvertToCSV(EventLog log)
         {
             string csvLine = $"{log.TimeStamp: yy-MM-dd HH:mm:ss},{log.Event},{log.EventData}";
             return csvLine;
         }
 
+        /// <inheritdoc/>
         public EventLog FromCSV(string line)
         {
             string[] values = line.Split(',');
@@ -27,7 +38,8 @@ namespace BoilerMachine.FileHandlers
                         );
         }
 
-        public List<EventLog> GetAll()
+        /// <inheritdoc/>
+        public IReadOnlyList<EventLog> GetAll()
         {
             List<EventLog> log;
             lock (_lockObject)
@@ -43,9 +55,10 @@ namespace BoilerMachine.FileHandlers
                     log.Add(FromCSV(line));
                 }
             }
-            return log;
+            return log.AsReadOnly();
         }
 
+        /// <inheritdoc/>
         public void Log(EventLog log)
         {
             string csvLine = ConvertToCSV(log);

@@ -4,16 +4,23 @@ using BoilerMachine.Repositories;
 using BoilerMachine.Services;
 using BoilerMachine.Views;
 
+/// <summary>
+/// Class program to start up the application
+/// </summary>
 class Program
 {
-    public static async Task Main(string[] args)
+    /// <summary>
+    /// Entry point of the program
+    /// </summary>
+    /// <param name="args">Command line arguments</param>
+    public static void Main(string[] args)
     {
         string filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "log.txt");
         Boiler boiler = new Boiler();
         CancellationTokenSource cts = new CancellationTokenSource();
-        FileHandler fileHandler = new FileHandler(filePath);
-        EventLogRepository logRepository = new EventLogRepository(fileHandler);
-        BoilerService boilerService = new BoilerService(boiler, logRepository);
+        IFileHandler fileHandler = new FileHandler(filePath);
+        IEventLogRepository logRepository = new EventLogRepository(fileHandler);
+        IBoilerService boilerService = new BoilerService(boiler, logRepository);
         ConsoleUI consoleUI = new ConsoleUI(boilerService);
         boilerService.OnResetRequest += ConsoleUI.DisplayResetRequest;
         boilerService.OnStartCompletion += ConsoleUI.DisplayStartCompletion;

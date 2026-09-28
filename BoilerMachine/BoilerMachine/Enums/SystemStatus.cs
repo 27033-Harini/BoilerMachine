@@ -2,7 +2,7 @@
 {
     public enum SystemStatus
     {
-        Lockout,
+        Lockout = 1,
         Ready,
         PrePurge,
         Ignition,

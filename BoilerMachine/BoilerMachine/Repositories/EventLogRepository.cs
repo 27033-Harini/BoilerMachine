@@ -3,20 +3,27 @@ using BoilerMachine.Models;
 
 namespace BoilerMachine.Repositories
 {
-    public class EventLogRepository
+    public class EventLogRepository : IEventLogRepository
     {
-        private readonly FileHandler _fileHandler;
-        public EventLogRepository(FileHandler fileHandler)
+        private readonly IFileHandler _fileHandler;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EventLogRepository"/> class.
+        /// </summary>
+        /// <param name="fileHandler">File handler object</param>
+        public EventLogRepository(IFileHandler fileHandler)
         {
             this._fileHandler = fileHandler;
         }
 
+        /// <inheritdoc/>
         public void Log(EventLog log)
         {
             _fileHandler.Log(log);
         }
 
-        public List<EventLog> GetAll()
+        /// <inheritdoc/>
+        public IReadOnlyList<EventLog> GetAll()
         {
             return _fileHandler.GetAll();
         }

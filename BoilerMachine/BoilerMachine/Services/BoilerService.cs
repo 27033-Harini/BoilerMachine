@@ -5,10 +5,13 @@ using BoilerMachine.Repositories;
 
 namespace BoilerMachine.Services
 {
+    /// <summary>
+    /// Class to handle all the boiler service management
+    /// </summary>
     public class BoilerService : IBoilerService
     {
         private readonly Boiler _boiler;
-        private readonly EventLogRepository _logRepository;
+        private readonly IEventLogRepository _logRepository;
         private bool IsRunning = false;
         private CancellationTokenSource? _cts;
         public event InterruptStart? OnStartInterrupted;
@@ -16,12 +19,19 @@ namespace BoilerMachine.Services
         public event StartCompletion? OnStartCompletion;
         public event Action? OnAlreadyRunning;
         public event Started? OnStart;
-        public BoilerService(Boiler boiler, EventLogRepository logRepository)
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="BoilerService"/> class.
+        /// </summary>
+        /// <param name="boiler">Boiler model object</param>
+        /// <param name="logRepository">LogRepository</param>
+        public BoilerService(Boiler boiler, IEventLogRepository logRepository)
         {
             this._boiler = boiler;
             this._logRepository = logRepository;
         }
 
+        /// <inheritdoc/>
         public async Task StartSequence()
         {
             SystemStatus status = this.GetSystemStatus();
@@ -50,6 +60,7 @@ namespace BoilerMachine.Services
             }
         }
 
+        /// <inheritdoc/>
         public async Task RunSequence(CancellationTokenSource cts)
         {
             try
@@ -74,20 +85,36 @@ namespace BoilerMachine.Services
             }
         }
 
+        /// <inheritdoc/>
         public bool StopSequence()
         {
-            if (this.IsRunning == false)
+            try
+            {
+                if (this.IsRunning == false)
+                {
+                    return false;
+                }
+                else
+                {
+                    this.UpdateSystemStatus(SystemStatus.Ready);
+                    if (_cts != null)
+                    {
+                        if (_cts.Token.CanBeCanceled)
+                        {
+                            _cts?.Cancel();
+                        }
+                    }
+
+                    return true;
+                }
+            }
+            catch (Exception)
             {
                 return false;
             }
-            else
-            {
-                this.UpdateSystemStatus(SystemStatus.Ready);
-                _cts?.Cancel();
-                return true;
-            }
         }
 
+        /// <inheritdoc/>
         public OperationResult Toggle()
         {
             if (this.IsRunning)
@@ -114,6 +141,7 @@ namespace BoilerMachine.Services
             }
         }
 
+        /// <inheritdoc/>
         public bool SimulateError()
         {
             if (this._boiler.Status == SystemStatus.Operable)
@@ -128,22 +156,26 @@ namespace BoilerMachine.Services
             }
         }
 
+        /// <inheritdoc/>
         public InterlockSwitchStatus GetCurrentToggleStatus()
         {
             return this._boiler.SwitchStatus;
         }
 
+        /// <inheritdoc/>
         public SystemStatus GetSystemStatus()
         {
             return this._boiler.Status;
         }
 
+        /// <inheritdoc/>
         public void UpdateSystemStatus(SystemStatus status)
         {
             this._boiler.Status = status;
             _logRepository.Log(new EventLog(DateTime.Now, "System status updated", this._boiler.Status.ToString()));
         }
 
+        /// <inheritdoc/>
         public bool ResetMachine()
         {
             if (this.GetCurrentToggleStatus() == InterlockSwitchStatus.Closed)
@@ -158,7 +190,8 @@ namespace BoilerMachine.Services
             }
         }
 
-        public List<EventLog> GetAll()
+        /// <inheritdoc/>
+        public IReadOnlyList<EventLog> GetAll()
         {
             return this._logRepository.GetAll();
         }
