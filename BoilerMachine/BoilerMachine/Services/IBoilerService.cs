@@ -74,5 +74,10 @@ namespace BoilerMachine.Services
         /// </summary>
         /// <returns>System status returned</returns>
         SystemStatus GetSystemStatus();
+
+        /// <summary>
+        /// Logs the first event of initialization to the logger file
+        /// </summary>
+        void InitializeBoiler();
     }
 }

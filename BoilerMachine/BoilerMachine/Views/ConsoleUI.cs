@@ -49,8 +49,10 @@ namespace BoilerMachine.Views
             {
                 Console.Clear();
                 DisplayMenu();
-                DisplaySegregationLines();
+                DisplaySegregationLinesTopToBottom();
+                DisplaySegregationLinesLeftToRight();
                 DisplayEventsHeader();
+                InitializeBoiler();
                 Console.SetCursorPosition(0, 13);
                 string? input = Console.ReadLine();
                 if (!Enum.TryParse(input, out MainMenuOptions option) || !Enum.IsDefined(option))
@@ -59,6 +61,7 @@ namespace BoilerMachine.Views
                     Pause();
                     continue;
                 }
+                Console.SetCursorPosition(0, 20);
                 switch (option)
                 {
                     case MainMenuOptions.Start:
@@ -95,10 +98,15 @@ namespace BoilerMachine.Views
             }
         }
 
+        public void InitializeBoiler()
+        {
+            this._boilerService.InitializeBoiler();
+        }
+
         /// <summary>
         /// Seperates the screen into two.
         /// </summary>
-        public void DisplaySegregationLines()
+        public void DisplaySegregationLinesTopToBottom()
         {
             for(int y = 0; y < 30; y++)
             {
@@ -107,12 +115,15 @@ namespace BoilerMachine.Views
             }
         }
 
-        public void ClearSpecificLeftArea()
+        /// <summary>
+        /// Seperates the screen into two from the left to right
+        /// </summary>
+        public void DisplaySegregationLinesLeftToRight()
         {
-            for (int y = 13; y < 30; y++)
+            for (int x = 0; x < 60; x++)
             {
-                Console.SetCursorPosition(0, y);
-                Console.WriteLine(new string(' ', 59));
+                Console.SetCursorPosition(x, Console.WindowHeight/2);
+                Console.WriteLine("-");
             }
         }
 

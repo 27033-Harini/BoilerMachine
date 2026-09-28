@@ -195,5 +195,11 @@ namespace BoilerMachine.Services
         {
             return this._logRepository.GetAll();
         }
+
+        /// <inheritdoc/>
+        public void InitializeBoiler()
+        {
+            this._logRepository.Log(new EventLog(DateTime.Now, "Boiler initialized", this._boiler.Status.ToString()));
+        }
     }
 }
