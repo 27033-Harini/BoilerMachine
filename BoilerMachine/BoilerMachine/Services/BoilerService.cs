@@ -67,9 +67,12 @@ namespace BoilerMachine.Services
             {
                 await Task.Delay(10 * 1000, cts.Token);
                 this.UpdateSystemStatus(SystemStatus.PrePurge);
+                _logRepository.Log(new EventLog(DateTime.Now, "Pre purge completed.", this._boiler.Status.ToString()));
                 await Task.Delay(10 * 1000, cts.Token);
                 this.UpdateSystemStatus(SystemStatus.Ignition);
+                _logRepository.Log(new EventLog(DateTime.Now, "Ignition completed.", this._boiler.Status.ToString()));
                 this.UpdateSystemStatus(SystemStatus.Operable);
+                _logRepository.Log(new EventLog(DateTime.Now, "Boiler now operational", this._boiler.Status.ToString()));
                 OnStartCompletion?.Invoke();
             }
             catch(OperationCanceledException)
@@ -181,7 +184,7 @@ namespace BoilerMachine.Services
             if (this.GetCurrentToggleStatus() == InterlockSwitchStatus.Closed)
             {
                 this._boiler.Status = SystemStatus.Ready;
-                _logRepository.Log(new EventLog(DateTime.Now, "System reset done", this._boiler.Status.ToString()));
+                _logRepository.Log(new EventLog(DateTime.Now, "Boiler status changed to ready.", this._boiler.Status.ToString()));
                 return true;
             }
             else
