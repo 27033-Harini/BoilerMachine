@@ -4,11 +4,14 @@ using BoilerMachine.Views;
 
 class Program
 {
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         Boiler boiler = new Boiler();
         BoilerService boilerService = new BoilerService(boiler);
         ConsoleUI consoleUI = new ConsoleUI(boilerService);
-        consoleUI.HandleUserChoice();
+        boilerService.OnResetRequest += consoleUI.DisplayResetRequest;
+        boilerService.OnStartCompletion += consoleUI.DisplayStartCompletion;
+        boilerService.OnStartInterrupted += consoleUI.DisplayStartInterruption;
+        await consoleUI.HandleUserChoice();
     }
 }

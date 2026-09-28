@@ -1,6 +1,8 @@
 ﻿using BoilerMachine.Enums;
+using BoilerMachine.Models;
 using BoilerMachine.Services;
 using System.Threading.Channels;
+using System.Threading.Tasks;
 
 namespace BoilerMachine.Views
 {
@@ -14,12 +16,17 @@ namespace BoilerMachine.Views
         public static void DisplayMenu()
         {
             Console.WriteLine("Boiler Controller Initialized");
-            Console.WriteLine("1. Toggle Run Interlock Switch");
-            Console.WriteLine("2. Reset lockout");
+            Console.WriteLine("1. Start Boiler Sequence");
+            Console.WriteLine("2. Stop Boiler Sequence");
+            Console.WriteLine("3. Simulate Boiler Error");
+            Console.WriteLine("4. Toggle Run Interlock Switch");
+            Console.WriteLine("6. Reset lockout");
+            Console.WriteLine("7. View Event log");
+            Console.WriteLine("8. Exit Application");
             Console.WriteLine("Enter your choice: ");
         }
 
-        public void HandleUserChoice()
+        public async Task HandleUserChoice()
         {
             while (true)
             {
@@ -28,10 +35,18 @@ namespace BoilerMachine.Views
                 switch (Console.ReadLine()?.Trim())
                 {
                     case "1":
-                        this.DisplayToggleRequest();
+                        this.DisplayStartRequest();
                         Console.ReadKey();
                         break;
                     case "2":
+                        this.DisplayStopRequest();
+                        Console.ReadKey();
+                        break;
+                    case "4":
+                        this.DisplayToggleRequest();
+                        Console.ReadKey();
+                        break;
+                    case "6":
                         this.DisplayResetOperations();
                         Console.ReadKey();
                         break;
@@ -48,16 +63,22 @@ namespace BoilerMachine.Views
         {
             Console.WriteLine($"The current state of the toggle: {this._boilerService.GetCurrentToggleStatus()}");
             Console.WriteLine("Toggling the switch...");
-            if (this._boilerService.Toggle())
+            OperationResult toggleResult = this._boilerService.Toggle();
+            if (toggleResult.IsOperationCompleted)
             {
+                Console.WriteLine("The toggle is updated.");
                 Console.WriteLine($"The current state of the toggle: {this._boilerService.GetCurrentToggleStatus()}");
+            }
+            else
+            {
+                Console.WriteLine($"{toggleResult.ErrorMessage}");
             }
         }
 
         public void DisplayResetOperations()
         {
             InterlockSwitchStatus status = this._boilerService.GetCurrentToggleStatus();
-            bool isStatusUpdated = this._boilerService.UpdateSystemStatus();
+            bool isStatusUpdated = this._boilerService.ResetMachine();
             if (!isStatusUpdated)
             {
                 Console.WriteLine("The interlock switch needs to be closed first in order for a reset to occur.");
@@ -68,6 +89,39 @@ namespace BoilerMachine.Views
                 Console.WriteLine($"System Status: {this._boilerService.GetSystemStatus()}");
                 Console.WriteLine($"Interlock Switch Status: {this._boilerService.GetCurrentToggleStatus()}");
             }
+        }
+
+        public void DisplayStartRequest()
+        {
+            _ = this._boilerService.StartSequence();
+        }
+
+        public void DisplayStopRequest()
+        {
+            bool result = this._boilerService.StopSequence();
+            if (result)
+            {
+                Console.WriteLine("The start sequence is stopped.");
+            }
+            else
+            {
+                Console.WriteLine("The start sequence is not running to be stopped.");
+            }
+        }
+
+        public void DisplayStartInterruption()
+        {
+            Console.WriteLine("The start operation was interrupted due to cancellation");
+        }
+
+        public void DisplayResetRequest()
+        {
+            Console.WriteLine("The system needs to be reset since starting requires the status to be ready.");
+        }
+
+        public void DisplayStartCompletion()
+        {
+            Console.WriteLine("Start operation is completed successfully.");
         }
     }
 }
