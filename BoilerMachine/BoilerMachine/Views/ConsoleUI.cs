@@ -15,18 +15,21 @@ namespace BoilerMachine.Views
         }
         public static void DisplayMenu()
         {
-            Console.WriteLine("Boiler Controller Initialized");
+            Console.WriteLine(new string('-', 19));
+            Console.WriteLine("Welcome! Boiler Controller Initialized!");
             Console.WriteLine("1. Start Boiler Sequence");
             Console.WriteLine("2. Stop Boiler Sequence");
             Console.WriteLine("3. Simulate Boiler Error");
             Console.WriteLine("4. Toggle Run Interlock Switch");
-            Console.WriteLine("6. Reset lockout");
-            Console.WriteLine("7. View Event log");
-            Console.WriteLine("8. Exit Application");
+            Console.WriteLine("5. Reset lockout");
+            Console.WriteLine("6. View Event log");
+            Console.WriteLine("7. Exit Application");
+            Console.WriteLine(new string('-', 19));
             Console.WriteLine("Enter your choice: ");
+            Console.WriteLine(new string('-', 19));
         }
 
-        public async Task HandleUserChoice()
+        public void HandleUserChoice()
         {
             while (true)
             {
@@ -35,11 +38,11 @@ namespace BoilerMachine.Views
                 switch (Console.ReadLine()?.Trim())
                 {
                     case "1":
-                        this.DisplayStartRequest();
+                        this.Start();
                         Console.ReadKey();
                         break;
                     case "2":
-                        this.DisplayStopRequest();
+                        this._boilerService.StopSequence();
                         Console.ReadKey();
                         break;
                     case "3":
@@ -50,16 +53,46 @@ namespace BoilerMachine.Views
                         this.DisplayToggleRequest();
                         Console.ReadKey();
                         break;
-                    case "6":
+                    case "5":
                         this.DisplayResetOperations();
                         Console.ReadKey();
+                        break;
+                    case "6":
+                        this.DisplayEventLogs();
+                        Console.ReadKey();
+                        break;
+                    case "7":
+                        this.DisplayExitMessage();
+                        return;
+                    default:
+                        this.DisplayInvalidInputMessage();
                         break;
                 }
             }
         }
 
+        public void DisplayExitMessage()
+        {
+            Console.WriteLine("Exiting...");
+        }
+
+        public void DisplayInvalidInputMessage()
+        {
+            Console.WriteLine("The input is invalid. Should be between 1 - 7");
+        }
+
+        public void DisplayEventLogs()
+        {
+            var logs = this._boilerService.GetAll();
+            foreach (var log in logs)
+            {
+                Console.WriteLine($"{log.TimeStamp}\t{log.Event}\t{log.EventData}");
+            }
+        }
+
         public void DisplayStopRequestToToggle()
         {
+            Console.SetCursorPosition(60, 1);
             Console.WriteLine("The current sequence is running and hence it should be stopped in order to toggle the interlock switch.");
         }
 
@@ -94,8 +127,12 @@ namespace BoilerMachine.Views
                 Console.WriteLine($"Interlock Switch Status: {this._boilerService.GetCurrentToggleStatus()}");
             }
         }
-
-        public void DisplayStartRequest()
+        public void DisplayStarted()
+        {
+            Console.SetCursorPosition(60, 5);
+            Console.WriteLine("The boiler sequence has started.");
+        }
+        public void Start()
         {
             _ = this._boilerService.StartSequence();
         }
@@ -113,24 +150,27 @@ namespace BoilerMachine.Views
             }
         }
 
-        public void DisplayStartInterruption()
+        public static void DisplayStartInterruption()
         {
+            Console.SetCursorPosition(60, 7);
             Console.WriteLine("The start operation was interrupted due to cancellation");
         }
 
-        public void DisplayResetRequest()
+        public static void DisplayResetRequest()
         {
+            Console.SetCursorPosition(60, 9);
             Console.WriteLine("The system needs to be reset since starting requires the status to be ready.");
         }
 
-        public void DisplayStartCompletion()
+        public static void DisplayStartCompletion()
         {
+            Console.SetCursorPosition(60, 12);
             Console.WriteLine("Start operation is completed successfully.");
         }
 
-        public void DisplayRunningMessage()
+        public static void DisplayRunningMessage()
         {
-            Console.WriteLine("The start sequene is already running.");
+            Console.WriteLine("The start sequence is already running.");
         }
 
         public void SimulateError()
@@ -140,6 +180,16 @@ namespace BoilerMachine.Views
             {
                 Console.WriteLine("Error: System is in lockout.");
             }
+            else
+            {
+                Console.WriteLine("The system should be in Operable status in order to smulate an error");
+            }
+        }
+
+        public static void Pause()
+        {
+            Console.WriteLine("Press any key to continue...");
+            Console.ReadKey();
         }
     }
 }
