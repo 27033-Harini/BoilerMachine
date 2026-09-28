@@ -1,6 +1,6 @@
 ﻿namespace BoilerMachine.Delegates
 {
-    public delegate void Started();
+    public delegate void Start();
     internal class StartSequence
     {
     }

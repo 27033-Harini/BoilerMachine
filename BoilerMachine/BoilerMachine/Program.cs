@@ -25,7 +25,7 @@ class Program
         boilerService.OnResetRequest += ConsoleUI.DisplayResetRequest;
         boilerService.OnStartCompletion += ConsoleUI.DisplayStartCompletion;
         boilerService.OnStartInterrupted += ConsoleUI.DisplayStartInterruption;
-        boilerService.OnAlreadyRunning += ConsoleUI.DisplayRunningMessage;
+        boilerService.OnRunning += ConsoleUI.DisplayRunningMessage;
         boilerService.OnStart += consoleUI.DisplayStarted;
         consoleUI.HandleUserChoice();
     }

@@ -162,17 +162,6 @@ namespace BoilerMachine.Views
         }
 
         /// <summary>
-        /// Displays the stop request message when tried to toggle upon boiler being in progress.
-        /// </summary>
-        public void DisplayStopRequestToToggle()
-        {
-            Console.SetCursorPosition(60, 3);
-            Console.WriteLine("The current sequence is running and hence it should ");
-            Console.SetCursorPosition(60, 4);
-            Console.WriteLine("be stopped in order to toggle the interlock switch.");
-        }
-
-        /// <summary>
         /// Displays the toggle state before and after switch. If error, it is printed as a message.
         /// </summary>
         public void DisplayToggleState()

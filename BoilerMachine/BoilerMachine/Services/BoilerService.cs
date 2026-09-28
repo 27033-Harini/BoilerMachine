@@ -15,10 +15,10 @@ namespace BoilerMachine.Services
         private bool IsRunning = false;
         private CancellationTokenSource? _cts;
         public event InterruptStart? OnStartInterrupted;
-        public event ResetRequest? OnResetRequest;
+        public event Reset? OnResetRequest;
         public event StartCompletion? OnStartCompletion;
-        public event Action? OnAlreadyRunning;
-        public event Started? OnStart;
+        public event Running? OnRunning;
+        public event Start? OnStart;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BoilerService"/> class.
@@ -42,7 +42,7 @@ namespace BoilerMachine.Services
             }
             if (this.IsRunning)
             {
-                OnAlreadyRunning?.Invoke();
+                OnRunning?.Invoke();
                 return;
             }
             this.IsRunning = true;

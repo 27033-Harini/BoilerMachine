@@ -10,10 +10,10 @@ namespace BoilerMachine.Services
     public interface IBoilerService
     {
         public event InterruptStart? OnStartInterrupted;
-        public event ResetRequest? OnResetRequest;
+        public event Reset? OnResetRequest;
         public event StartCompletion? OnStartCompletion;
-        public event Action? OnAlreadyRunning;
-        public event Started? OnStart;
+        public event Running? OnRunning;
+        public event Start? OnStart;
         /// <summary>
         /// Task to start the boiler sequence
         /// </summary>
