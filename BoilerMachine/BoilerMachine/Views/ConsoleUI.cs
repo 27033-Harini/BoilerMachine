@@ -45,56 +45,63 @@ namespace BoilerMachine.Views
         /// </summary>
         public void HandleUserChoice()
         {
-            while (true)
+            try
             {
-                Console.Clear();
-                DisplayMenu();
-                DisplaySegregationLinesTopToBottom();
-                DisplaySegregationLinesLeftToRight();
-                DisplayEventsHeader();
-                InitializeBoiler();
-                Console.SetCursorPosition(0, 13);
-                string? input = Console.ReadLine();
-                if (!Enum.TryParse(input, out MainMenuOptions option) || !Enum.IsDefined(option))
+                while (true)
                 {
-                    DisplayInvalidInputMessage();
-                    Pause();
-                    continue;
+                    Console.Clear();
+                    DisplayMenu();
+                    DisplaySegregationLinesTopToBottom();
+                    DisplaySegregationLinesLeftToRight();
+                    DisplayEventsHeader();
+                    InitializeBoiler();
+                    Console.SetCursorPosition(0, 13);
+                    string? input = Console.ReadLine();
+                    if (!Enum.TryParse(input, out MainMenuOptions option) || !Enum.IsDefined(option))
+                    {
+                        DisplayInvalidInputMessage();
+                        Pause();
+                        continue;
+                    }
+                    Console.SetCursorPosition(0, 20);
+                    switch (option)
+                    {
+                        case MainMenuOptions.Start:
+                            this.Start();
+                            Pause();
+                            break;
+                        case MainMenuOptions.Stop:
+                            this.DisplayStopRequest();
+                            Pause();
+                            break;
+                        case MainMenuOptions.SimulateError:
+                            this.SimulateError();
+                            Pause();
+                            break;
+                        case MainMenuOptions.Toggle:
+                            this.DisplayToggleState();
+                            Pause();
+                            break;
+                        case MainMenuOptions.Reset:
+                            this.DisplayResetOperations();
+                            Pause();
+                            break;
+                        case MainMenuOptions.EventLog:
+                            this.DisplayEventLogs();
+                            Pause();
+                            break;
+                        case MainMenuOptions.Exit:
+                            this.DisplayExitMessage();
+                            return;
+                        default:
+                            this.DisplayInvalidInputMessage();
+                            break;
+                    }
                 }
-                Console.SetCursorPosition(0, 20);
-                switch (option)
-                {
-                    case MainMenuOptions.Start:
-                        this.Start();
-                        Pause();
-                        break;
-                    case MainMenuOptions.Stop:
-                        this.DisplayStopRequest();
-                        Pause();
-                        break;
-                    case MainMenuOptions.SimulateError:
-                        this.SimulateError();
-                        Pause();
-                        break;
-                    case MainMenuOptions.Toggle:
-                        this.DisplayToggleState();
-                        Pause();
-                        break;
-                    case MainMenuOptions.Reset:
-                        this.DisplayResetOperations();
-                        Pause();
-                        break;
-                    case MainMenuOptions.EventLog:
-                        this.DisplayEventLogs();
-                        Pause();
-                        break;
-                    case MainMenuOptions.Exit:
-                        this.DisplayExitMessage();
-                        return;
-                    default:
-                        this.DisplayInvalidInputMessage();
-                        break;
-                }
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("Unexpected error caused.");
             }
         }
 
